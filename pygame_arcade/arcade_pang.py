@@ -64,7 +64,7 @@ ball_images =[
 ]
 
 # 공 크기에 따른 최초 스피드
-ball_speed_y = [-18, -15, -12, -9] # 각 index 0,1,2,3에 해당하는 값
+ball_speed_y = [-18, -15, -12, -9] 
 
 # 공들
 balls = []
@@ -123,8 +123,8 @@ while running:
     weapons = [ [w[0], w[1]] for w in weapons if w[1] > 0]
 
 # 공 위치 정의
-    for ball_idx, ball_val in enumerate(balls): # enumerate : balls리스트에 있는걸 하나씩 가져와서 몇번재에 있는지, 그 값도 가져와줌
-        ball_pos_x = ball_val["pos_x"] # ball_val에 있는 pos_x 값을 ball_pos_x에 넣음
+    for ball_idx, ball_val in enumerate(balls):
+        ball_pos_x = ball_val["pos_x"] 
         ball_pos_y = ball_val["pos_y"]
         ball_img_idx = ball_val["img_idx"]
 
@@ -140,7 +140,7 @@ while running:
 # 스테이지에 튕겨 올라가는 처리
         if ball_pos_y >= screen_height -  stage_height - ball_height:
             ball_val["to_y"] = ball_val["init_spd_y"]
-        else: # 그 외의 모든 경우에는 속도를 증가
+        else: 
             ball_val["to_y"] += 0.5 
 
 # 값을 반영 (위치 정의)
@@ -183,7 +183,37 @@ while running:
             if weapon_rect.colliderect(ball_rect):
                 weapon_to_remove = weapon_idx # 해당 무기 없애기 위한 값 설정
                 ball_to_remove = ball_idx # 해당 공 없애기 위한 값 설정
-                break
+                
+                # 가장 작은 크기의 공이 아니라면 다음 단계의 공으로 나눠주기
+                if ball_img_idx < 3: 
+                    # 현재 공 크기 정보 가져오기
+                    ball_width = ball_rect.size[0]
+                    ball_height = ball_rect.size[1]
+
+                    # 나눠진 공 정보 (현재 인덱스 +1)
+                    small_ball_rect = ball_images[ball_img_idx + 1].get_rect()
+                    small_ball_width = ball_rect.size[0]
+                    small_ball_height = ball_rect.size[1]
+
+
+                    # 쪼개질 때 왼쪽으로 튕겨나가는 작은 공
+                    balls.append({
+                "pos_x" : ball_pos_x + (ball_width / 2) - (small_ball_width / 2),
+                "pos_y" : ball_pos_y + (ball_height / 2) - (small_ball_height / 2),
+                "img_idx" : ball_img_idx + 1, 
+                "to_x": -3, # 왼쪽으로 튕겨나가니까 -
+                "to_y": -6, 
+                "init_spd_y": ball_speed_y[ball_img_idx + 1]})
+
+                    # 오른쪽으로 튕겨나가는 작은 공
+                    balls.append({
+                "pos_x" : ball_pos_x + (ball_width / 2) - (small_ball_width / 2),
+                "pos_y" : ball_pos_y + (ball_height / 2) - (small_ball_height / 2),
+                "img_idx" : ball_img_idx + 1, 
+                "to_x": 3, 
+                "to_y": -6, 
+                "init_spd_y": ball_speed_y[ball_img_idx + 1]})
+                    break 
 
     # 충돌된 공 or 무기 없애기
     if ball_to_remove > -1:
